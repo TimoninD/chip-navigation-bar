@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.transition.TransitionManager
 import android.util.AttributeSet
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
@@ -15,6 +13,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.MenuRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.ismaeldivita.chipnavigation.model.Menu
 import com.ismaeldivita.chipnavigation.model.MenuParser
 import com.ismaeldivita.chipnavigation.model.MenuStyle
 import com.ismaeldivita.chipnavigation.util.applyWindowInsets
@@ -26,8 +25,8 @@ import com.ismaeldivita.chipnavigation.view.MenuItemView
 import com.ismaeldivita.chipnavigation.view.VerticalMenuItemView
 
 class ChipNavigationBar @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null
+        context: Context,
+        attrs: AttributeSet? = null
 ) : ConstraintLayout(context, attrs) {
 
     private lateinit var orientationMode: MenuOrientation
@@ -38,6 +37,8 @@ class ChipNavigationBar @JvmOverloads constructor(
 
     @MenuRes
     private var menuRes = -1
+
+    var menu: Menu? = null
 
     private val badgesState = mutableMapOf<Int, Int>()
 
@@ -77,26 +78,26 @@ class ChipNavigationBar @JvmOverloads constructor(
      */
     fun setMenuResource(@MenuRes menuRes: Int) {
         this.menuRes = menuRes
-
         val menu = (MenuParser(context).parse(menuRes, menuStyle))
+        this.menu = menu
         val childListener: (View) -> Unit = { view -> setItemSelected(view.id) }
 
         removeAllViews()
 
         menu.items.forEach {
             createMenuItem()
-                .apply {
-                    bind(it)
-                    setOnClickListener(childListener)
-                }
-                .also(::addView)
+                    .apply {
+                        bind(it)
+                        setOnClickListener(childListener)
+                    }
+                    .also(::addView)
         }
 
         when (orientationMode) {
             MenuOrientation.HORIZONTAL -> getHorizontalFlow()
             MenuOrientation.VERTICAL -> getVerticalFlow()
         }.apply { referencedIds = menu.items.map { it.id }.toIntArray() }
-            .also(::addView)
+                .also(::addView)
     }
 
     /**
@@ -281,8 +282,8 @@ class ChipNavigationBar @JvmOverloads constructor(
      * @return the menu item view or null if the id was not found
      */
     private fun getItemById(id: Int) = getChildren()
-        .filterIsInstance<MenuItemView>()
-        .firstOrNull { it.id == id }
+            .filterIsInstance<MenuItemView>()
+            .firstOrNull { it.id == id }
 
     /**
      * Create a menu item view based on the menu orientationMode
@@ -329,9 +330,9 @@ class ChipNavigationBar @JvmOverloads constructor(
 
                 if (state.selectedItem != -1) {
                     setItemSelected(
-                        id = state.selectedItem,
-                        isSelected = true,
-                        dispatchAction = false
+                            id = state.selectedItem,
+                            isSelected = true,
+                            dispatchAction = false
                     )
                 }
 
